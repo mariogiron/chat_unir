@@ -1,0 +1,42 @@
+extends layout.pug
+
+block content 
+    h1 Chat
+    h2 Hola #{username}
+    h3#numClients
+
+    .row 
+        .col-12 
+            ul#mensajes
+    .row 
+        .col-12 
+            input#inputMensaje.form-control(type="text")
+            button#btnEnviar.btn.btn-info.mt-2 Enviar
+
+    script.
+        const socket = io();
+        const username = "#{username}";
+
+        const btnEnviar = document.getElementById('btnEnviar');
+        const inputMensaje = document.getElementById('inputMensaje');
+        const mensajes = document.getElementById('mensajes');
+        const numClients = document.getElementById('numClients');
+
+        btnEnviar.addEventListener('click', ()=>{
+            const data = {
+                username: username,
+                message: inputMensaje.value
+            }
+            socket.emit('chat_message', data);
+        });
+
+        socket.on('chat_message', (data)=> {
+            const li = document.createElement('li');
+            li.innerText = `${data.username}: ${data.message}`;
+
+            mensajes.append(li);
+        });
+
+        socket.on('chat_users', (count)=>{
+            numClients.innerText = `Usuarios conectados: ${count}`;
+        });
